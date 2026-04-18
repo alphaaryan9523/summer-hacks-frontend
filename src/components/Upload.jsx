@@ -130,6 +130,11 @@ export default function Upload({ setJobs, setKeywords }) {
       return;
     }
 
+    if (!BACKEND_URL) {
+      alert("Backend URL is missing. Check your .env file.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("resume", file);
     formData.append("keyword", keyword.trim() || "Software Developer");
@@ -140,10 +145,23 @@ export default function Upload({ setJobs, setKeywords }) {
 
       const res = await fetch(`${BACKEND_URL}/match-jobs`, {
         method: "POST",
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
         body: formData,
       });
 
-      const data = await res.json();
+      const text = await res.text();
+
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        console.error("Raw response:", text);
+        throw new Error(
+          `Backend did not return JSON. Response starts with: ${text.slice(0, 120)}`
+        );
+      }
 
       if (!res.ok) {
         throw new Error(data.detail || "Failed to match jobs");
@@ -268,7 +286,7 @@ export default function Upload({ setJobs, setKeywords }) {
                       accept=".pdf"
                       style={{ display: "none" }}
                       onChange={(e) => {
-                        const selectedFile = e.target.files[0];
+                        const selectedFile = e.target.files?.[0];
                         if (selectedFile) {
                           setFile(selectedFile);
                           setFileName(selectedFile.name);
@@ -668,13 +686,13 @@ const styles = {
     width: "250px",
     height: "250px",
     borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(110,65,255,0.16), transparent 68%)",
+    background: "radial-gradient(circle, rgba(123, 84, 255, 0.16), transparent 65%)",
     pointerEvents: "none",
   },
 
   panelTop: {
     position: "relative",
-    zIndex: 2,
+    zIndex: 1,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -685,17 +703,17 @@ const styles = {
 
   panelTitle: {
     margin: 0,
-    fontSize: "28px",
-    fontWeight: "850",
-    letterSpacing: "-0.8px",
-    color: "#24163a",
+    fontSize: "26px",
+    fontWeight: "900",
+    letterSpacing: "-0.7px",
+    color: "#261a3d",
   },
 
   panelText: {
     margin: "8px 0 0 0",
     fontSize: "14px",
-    color: "#7b6f94",
-    lineHeight: 1.6,
+    lineHeight: 1.7,
+    color: "#766d88",
   },
 
   readyBadge: {
@@ -704,9 +722,8 @@ const styles = {
     gap: "8px",
     padding: "10px 14px",
     borderRadius: "999px",
-    background: "#f2ecff",
-    color: "#5f22d9",
-    border: "1px solid #e2d7ff",
+    background: "#f3edff",
+    color: "#5d24d3",
     fontSize: "13px",
     fontWeight: "800",
   },
@@ -720,50 +737,50 @@ const styles = {
 
   contentGrid: {
     position: "relative",
-    zIndex: 2,
+    zIndex: 1,
     display: "grid",
-    gridTemplateColumns: "1.45fr 0.75fr",
-    gap: "20px",
-    alignItems: "stretch",
+    gridTemplateColumns: "1.2fr 0.9fr",
+    gap: "24px",
   },
 
   leftColumn: {
     display: "flex",
     flexDirection: "column",
-    gap: "18px",
+    gap: "20px",
   },
 
   rightColumn: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
-    justifyContent: "space-between",
+    gap: "16px",
   },
 
   label: {
     display: "block",
-    marginBottom: "10px",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "800",
-    color: "#2a2140",
+    marginBottom: "10px",
+    color: "#3a2b57",
   },
 
   uploadShell: {
-    border: "1.5px dashed #d9c9ff",
-    borderRadius: "24px",
-    background:
-      "linear-gradient(180deg, rgba(246,241,255,0.92) 0%, rgba(252,250,255,0.98) 100%)",
+    width: "100%",
   },
 
   uploadArea: {
-    minHeight: "260px",
+    minHeight: "240px",
+    borderRadius: "24px",
+    border: "1.5px dashed #d8c8ff",
+    background:
+      "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(247,242,255,0.96) 100%)",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     textAlign: "center",
-    padding: "34px 20px",
+    padding: "28px",
     cursor: "pointer",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.45)",
   },
 
   uploadOrb: {
@@ -774,154 +791,150 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    boxShadow: "0 18px 36px rgba(108, 48, 255, 0.24)",
     marginBottom: "18px",
-    boxShadow: "0 20px 40px rgba(106, 50, 255, 0.24)",
   },
 
   uploadArrow: {
     color: "#fff",
-    fontSize: "28px",
+    fontSize: "32px",
     fontWeight: "900",
     lineHeight: 1,
   },
 
   uploadTitle: {
-    fontSize: "24px",
-    fontWeight: "850",
-    color: "#24163a",
-    marginBottom: "8px",
+    fontSize: "22px",
+    fontWeight: "900",
+    color: "#271b3f",
     letterSpacing: "-0.5px",
   },
 
   uploadSubtext: {
     fontSize: "14px",
-    color: "#7a6e91",
-    marginBottom: "8px",
+    color: "#7f7694",
+    marginTop: "8px",
+    lineHeight: 1.6,
   },
 
   uploadHint: {
+    marginTop: "14px",
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: "999px",
+    background: "#eee6ff",
+    color: "#5f24d5",
+    fontWeight: "800",
     fontSize: "12px",
-    color: "#9c91b3",
-    marginBottom: "22px",
   },
 
   uploadButton: {
-    background: "linear-gradient(135deg, #6c30ff 0%, #551ed6 100%)",
-    color: "#fff",
-    padding: "13px 22px",
+    marginTop: "18px",
+    padding: "12px 18px",
     borderRadius: "14px",
+    background: "#ffffff",
+    border: "1px solid #e3d7ff",
+    color: "#5f22d9",
     fontWeight: "800",
-    fontSize: "14px",
-    boxShadow: "0 14px 30px rgba(93, 46, 220, 0.24)",
+    boxShadow: "0 10px 24px rgba(95, 34, 217, 0.08)",
   },
 
   fileCard: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: "16px",
-    padding: "18px 20px",
-    background: "linear-gradient(180deg, #fbf9ff 0%, #f7f2ff 100%)",
-    border: "1px solid #e6dbff",
+    padding: "16px 18px",
     borderRadius: "20px",
-    flexWrap: "wrap",
+    background: "rgba(255,255,255,0.9)",
+    border: "1px solid #e7dcff",
+    boxShadow: "0 14px 28px rgba(88, 42, 197, 0.08)",
   },
 
   fileLeft: {
     display: "flex",
     alignItems: "center",
     gap: "14px",
+    minWidth: 0,
   },
 
   fileIcon: {
     width: "54px",
     height: "54px",
-    borderRadius: "16px",
+    borderRadius: "18px",
     background: "linear-gradient(135deg, #6c30ff 0%, #8d62ff 100%)",
     color: "#fff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "13px",
     fontWeight: "900",
-    letterSpacing: "0.5px",
+    fontSize: "14px",
+    flexShrink: 0,
   },
 
   fileName: {
     fontSize: "15px",
     fontWeight: "800",
-    color: "#24163a",
+    color: "#2e2147",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    maxWidth: "320px",
   },
 
   fileMeta: {
+    fontSize: "12px",
+    color: "#837a97",
     marginTop: "4px",
-    fontSize: "13px",
-    color: "#7c7095",
   },
 
   removeButton: {
-    background: "#fff",
-    border: "1px solid #d9c9ff",
-    color: "#5a1fd8",
-    padding: "10px 16px",
-    borderRadius: "12px",
+    border: "none",
+    background: "#f4eeff",
+    color: "#6428df",
     fontWeight: "800",
+    borderRadius: "14px",
+    padding: "11px 14px",
     cursor: "pointer",
+    flexShrink: 0,
   },
 
   formGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "16px",
-    alignItems: "end",
   },
 
   input: {
     width: "100%",
-    height: "56px",
-    padding: "0 18px",
+    height: "54px",
+    padding: "0 16px",
     borderRadius: "16px",
-    border: "1px solid #e4daf9",
-    outline: "none",
+    border: "1px solid #dfd2ff",
+    background: "rgba(255,255,255,0.96)",
     fontSize: "14px",
-    color: "#1f1831",
-    background: "#fff",
+    color: "#271d3d",
+    outline: "none",
     boxSizing: "border-box",
-    boxShadow: "0 8px 18px rgba(90,31,216,0.04)",
   },
 
   buttonWrap: {
     display: "flex",
-    justifyContent: "center",
-    marginTop: "4px",
-    paddingTop: "4px",
+    justifyContent: "flex-start",
   },
 
   primaryButton: {
     position: "relative",
     overflow: "hidden",
     border: "none",
-    background: "linear-gradient(135deg, #6c30ff 0%, #551ed6 100%)",
+    borderRadius: "18px",
+    padding: "16px 24px",
+    background: "linear-gradient(135deg, #6c30ff 0%, #8d62ff 100%)",
     color: "#fff",
-    padding: "16px 32px",
-    borderRadius: "16px",
     fontSize: "15px",
     fontWeight: "900",
     cursor: "pointer",
-    minWidth: "220px",
-    boxShadow: "0 20px 36px rgba(93, 46, 220, 0.26)",
-    letterSpacing: "0.2px",
-  },
-
-  buttonGlow: {
-    position: "absolute",
-    top: 0,
-    left: "-35%",
-    width: "32%",
-    height: "100%",
-    transform: "skewX(-24deg)",
-    background: "rgba(255,255,255,0.18)",
-    pointerEvents: "none",
+    boxShadow: "0 18px 34px rgba(100, 43, 233, 0.26)",
+    minWidth: "190px",
   },
 
   primaryButtonDisabled: {
@@ -929,112 +942,81 @@ const styles = {
     cursor: "not-allowed",
   },
 
+  buttonGlow: {
+    position: "absolute",
+    top: "-40px",
+    left: "-30px",
+    width: "120px",
+    height: "120px",
+    background: "radial-gradient(circle, rgba(255,255,255,0.26), transparent 60%)",
+    pointerEvents: "none",
+  },
+
   visualCard: {
-    background: "linear-gradient(180deg, #ffffff 0%, #faf8ff 100%)",
-    border: "1px solid #ece3ff",
+    background: "linear-gradient(180deg, #ffffff 0%, #faf6ff 100%)",
+    border: "1px solid #e7dbff",
     borderRadius: "24px",
     padding: "20px",
-    textAlign: "center",
-    boxShadow: "0 18px 40px rgba(94, 50, 200, 0.05)",
+    boxShadow: "0 16px 36px rgba(80, 33, 186, 0.08)",
   },
 
   illustrationSvg: {
     width: "100%",
-    maxWidth: "250px",
+    maxWidth: "280px",
     height: "auto",
     display: "block",
-    margin: "0 auto 14px auto",
+    margin: "0 auto 12px auto",
   },
 
   visualTitle: {
-    margin: "0 0 8px 0",
+    margin: "8px 0 8px 0",
     fontSize: "18px",
-    fontWeight: "800",
-    color: "#24163a",
+    fontWeight: "900",
+    color: "#261a3d",
   },
 
   visualText: {
     margin: 0,
-    fontSize: "14px",
-    lineHeight: 1.6,
-    color: "#7c7095",
+    fontSize: "13px",
+    lineHeight: 1.7,
+    color: "#7c728f",
   },
 
   infoCard: {
-    background: "rgba(255,255,255,0.9)",
-    border: "1px solid #ece3ff",
-    borderRadius: "20px",
-    padding: "18px",
     display: "flex",
     gap: "14px",
     alignItems: "flex-start",
-    boxShadow: "0 14px 28px rgba(90, 31, 216, 0.05)",
+    background: "rgba(255,255,255,0.88)",
+    border: "1px solid #eadfff",
+    borderRadius: "18px",
+    padding: "16px",
+    boxShadow: "0 14px 28px rgba(92, 51, 191, 0.05)",
   },
 
   infoNumber: {
-    minWidth: "40px",
+    width: "40px",
     height: "40px",
     borderRadius: "14px",
     background: "#efe7ff",
-    color: "#5f22d9",
+    color: "#5e24d5",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontWeight: "900",
     fontSize: "13px",
+    fontWeight: "900",
+    flexShrink: 0,
   },
 
   infoTitle: {
-    fontSize: "15px",
+    fontSize: "14px",
     fontWeight: "800",
-    color: "#24163a",
+    color: "#271c40",
     marginBottom: "4px",
   },
 
   infoText: {
-    fontSize: "13px",
-    color: "#7c7095",
-    lineHeight: 1.6,
+    fontSize: "12px",
+    lineHeight: 1.7,
+    color: "#7f758f",
   },
 };
-
-if (
-  typeof document !== "undefined" &&
-  !document.getElementById("upload-svg-style")
-) {
-  const style = document.createElement("style");
-  style.id = "upload-svg-style";
-  style.innerHTML = `
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body, #root {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-    }
-
-    body {
-      overflow-x: hidden;
-    }
-
-    input::placeholder {
-      color: #9b8fb3;
-    }
-
-    input:focus {
-      border-color: #6a32ff !important;
-      box-shadow: 0 0 0 4px rgba(106, 50, 255, 0.08) !important;
-    }
-
-    button {
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-  `;
-  document.head.appendChild(style);
-}
